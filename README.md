@@ -1,4 +1,4 @@
-CoinChangingProblem
+Coin Change Problem
 ===================
 
-Coin Changing Problem Solution
+Coin Change is the problem of finding the number of ways of making changes for a particular amount of cents
