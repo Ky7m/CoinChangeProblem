@@ -5,7 +5,7 @@ using System.Linq;
 
 namespace CoinChangeProblem
 {
-    internal class CoinChangeProblemSolution
+    public sealed class CoinChangeProblemSolution
     {
         private int[] _availableCoins;
         private uint _targetSum;
