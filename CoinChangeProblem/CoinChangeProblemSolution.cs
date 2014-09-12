@@ -1,7 +1,9 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
+using System.Threading;
 
 namespace CoinChangeProblem
 {
@@ -9,8 +11,7 @@ namespace CoinChangeProblem
     {
         private int[] _availableCoins;
         private uint _targetSum;
-        private readonly Hashtable _cache = new Hashtable();
-        private readonly HashSet<ulong> _cacheIndex = new HashSet<ulong>();
+        private readonly Dictionary<ulong, uint> _cache = new Dictionary<ulong, uint>();
 
         public CoinChangeProblemSolution SetAvailableCoins(int[] coins)
         {
@@ -32,6 +33,48 @@ namespace CoinChangeProblem
 
         private uint FindPossibleWays(uint sum, byte coinIndex)
         {
+            uint? result = null;
+            var stackSize = 0x40000;
+
+            while (true)
+            {
+                var currentStackSize = stackSize;
+                var worker = new Thread(
+                    () =>
+                    {
+                        try
+                        {
+                            result = FindPossibleWaysRecursive(sum, coinIndex);
+                        }
+                        catch (InsufficientExecutionStackException)
+                        {
+                            Debug.Print("InsufficientExecutionStackException on stack size:{0}", Convert.ToString(currentStackSize));
+                        }
+                    },
+                    stackSize);
+
+                worker.Start();
+                worker.Join();
+
+                if (result != null)
+                {
+                    return result.Value;
+                }
+
+                if (stackSize >= Int32.MaxValue/2)
+                {
+                    stackSize *= 2;
+                }
+                else
+                {
+                    stackSize = Int32.MaxValue;
+                }
+            }
+        }
+
+        private uint FindPossibleWaysRecursive(uint sum, byte coinIndex)
+        {
+            RuntimeHelpers.EnsureSufficientExecutionStack();
             while (_availableCoins[coinIndex] > sum)
             {
                 coinIndex++;
@@ -47,15 +90,10 @@ namespace CoinChangeProblem
             {
                 var remainSum = sum - c;
                 var keyForRemainSum = ((ulong)remainSum << 32) | coinIndex;
-                if (!_cacheIndex.Contains(keyForRemainSum))
+                if (!_cache.TryGetValue(keyForRemainSum, out count))
                 {
-                    count = FindPossibleWays(remainSum, coinIndex);
-                    _cache[keyForRemainSum] = count;
-                    _cacheIndex.Add(keyForRemainSum);
-                }
-                else
-                {
-                    count = (uint)_cache[keyForRemainSum];
+                    count = FindPossibleWaysRecursive(remainSum, coinIndex);
+                    _cache.Add(keyForRemainSum, count);
                 }
             }
 
@@ -65,16 +103,12 @@ namespace CoinChangeProblem
             }
             var keyForSubSum = ((ulong)sum << 32) | ((ulong)coinIndex + 1);
             uint subCount;
-            if (!_cacheIndex.Contains(keyForSubSum))
+            if (!_cache.TryGetValue(keyForSubSum, out subCount))
             {
-                subCount = FindPossibleWays(sum, (byte)(coinIndex + 1));
-                _cache[keyForSubSum] = subCount;
-                _cacheIndex.Add(keyForSubSum);
+                subCount = FindPossibleWaysRecursive(sum, (byte)(coinIndex + 1));
+                _cache.Add(keyForSubSum, subCount);
             }
-            else
-            {
-                subCount = (uint)_cache[keyForSubSum];
-            }
+
             count += subCount;
             return count;
         }
