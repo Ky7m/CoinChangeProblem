@@ -3,7 +3,7 @@ using System.Diagnostics;
 
 namespace CoinChangeProblem
 {
-    class CoinChangeProblemProgram
+    static class CoinChangeProblemProgram
     {
         static void Main()
         {

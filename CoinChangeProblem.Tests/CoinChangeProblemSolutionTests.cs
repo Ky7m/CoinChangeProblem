@@ -70,17 +70,6 @@ namespace CoinChangeProblem.Tests
                             .GetCountOfPossibleWays();
             Assert.AreEqual(result, 2526163903u);
         }
-        
-        [TestMethod]
-        [Description("Check count of possible ways. Target sum: 100000. Available coins: 1, 2, 5, 10, 25, 50")]
-        public void CheckCountFor100000Using_1_2_5_10_25_50()
-        {
-            var result = new CoinChangeProblemSolution()
-                            .SetAvailableCoins(new[] { 1, 2, 5, 10, 25, 50 })
-                            .SetTargetSum(100000)
-                            .GetCountOfPossibleWays();
-            Assert.AreEqual(result, 3613522941u);
-        }
 
         [TestMethod]
         [Description("Check count of possible ways. Target sum: 10. Available coins: 1, 2")]
