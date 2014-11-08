@@ -9,14 +9,23 @@ namespace CoinChangeProblem
 {
     public sealed class CoinChangeProblemSolution
     {
-        private int[] _availableCoins;
+        private static ushort[] availableCoins;
         private uint _targetSum;
-        private readonly Dictionary<ulong, uint> _cache = new Dictionary<ulong, uint>();
+        private SolutionMethods _targetSolutionMethods;
+        private static readonly Dictionary<ulong, uint> Cache = new Dictionary<ulong, uint>();
 
-        public CoinChangeProblemSolution SetAvailableCoins(int[] coins)
+        private readonly Dictionary<SolutionMethods, Func<uint, uint>> _registeredMethods = new Dictionary
+            <SolutionMethods, Func<uint, uint>>
+                                        {
+                                            { SolutionMethods.Recursive, FindPossibleWaysUsingRecursion },
+                                            { SolutionMethods.DynamicProgramming, FindPossibleWaysUsingDynamicProgramming }
+                                        };
+
+
+        public CoinChangeProblemSolution SetAvailableCoins(ushort[] coins)
         {
             Array.Sort(coins);
-            _availableCoins = coins.Reverse().ToArray();
+            availableCoins = coins.Reverse().ToArray();
             return this;
         }
 
@@ -25,13 +34,18 @@ namespace CoinChangeProblem
             _targetSum = target;
             return this;
         }
+        public CoinChangeProblemSolution Using(SolutionMethods method)
+        {
+            _targetSolutionMethods = method;
+            return this;
+        }
 
         public uint GetCountOfPossibleWays()
         {
-            return _targetSum == 0 ? 0 : FindPossibleWays(_targetSum, 0);
+            return _targetSum == 0 ? 0 : _registeredMethods[_targetSolutionMethods](_targetSum);
         }
 
-        private uint FindPossibleWays(uint sum, byte coinIndex)
+        private static uint FindPossibleWaysUsingRecursion(uint sum)
         {
             uint? result = null;
             var stackSize = 0x40000;
@@ -44,7 +58,7 @@ namespace CoinChangeProblem
                     {
                         try
                         {
-                            result = FindPossibleWaysRecursive(sum, coinIndex);
+                            result = FindPossibleWaysRecursive(sum, 0);
                         }
                         catch (InsufficientExecutionStackException)
                         {
@@ -61,7 +75,7 @@ namespace CoinChangeProblem
                     return result.Value;
                 }
 
-                if (stackSize >= Int32.MaxValue/2)
+                if (stackSize >= Int32.MaxValue / 2)
                 {
                     stackSize *= 2;
                 }
@@ -72,14 +86,14 @@ namespace CoinChangeProblem
             }
         }
 
-        private uint FindPossibleWaysRecursive(uint sum, byte coinIndex)
+        private static uint FindPossibleWaysRecursive(uint sum, byte coinIndex)
         {
             RuntimeHelpers.EnsureSufficientExecutionStack();
-            while (_availableCoins[coinIndex] > sum)
+            while (availableCoins[coinIndex] > sum)
             {
                 coinIndex++;
             }
-            var c = (uint)_availableCoins[coinIndex];
+            var c = (uint)availableCoins[coinIndex];
 
             uint count;
             if (sum == c)
@@ -90,27 +104,46 @@ namespace CoinChangeProblem
             {
                 var remainSum = sum - c;
                 var keyForRemainSum = ((ulong)remainSum << 32) | coinIndex;
-                if (!_cache.TryGetValue(keyForRemainSum, out count))
+                if (!Cache.TryGetValue(keyForRemainSum, out count))
                 {
                     count = FindPossibleWaysRecursive(remainSum, coinIndex);
-                    _cache.Add(keyForRemainSum, count);
+                    Cache.Add(keyForRemainSum, count);
                 }
             }
 
-            if (coinIndex >= (_availableCoins.Length - 1))
+            if (coinIndex >= (availableCoins.Length - 1))
             {
                 return count;
             }
             var keyForSubSum = ((ulong)sum << 32) | ((ulong)coinIndex + 1);
             uint subCount;
-            if (!_cache.TryGetValue(keyForSubSum, out subCount))
+            if (!Cache.TryGetValue(keyForSubSum, out subCount))
             {
                 subCount = FindPossibleWaysRecursive(sum, (byte)(coinIndex + 1));
-                _cache.Add(keyForSubSum, subCount);
+                Cache.Add(keyForSubSum, subCount);
             }
 
             count += subCount;
             return count;
+        }
+
+        private static uint FindPossibleWaysUsingDynamicProgramming(uint sum)
+        {
+            var table = new uint[sum + 1];
+            table[0] = 1;
+
+            // Pick all coins one by one and update the table[] values
+            // after the index greater than or equal to the value of the
+            // picked coin
+            for (var i = 0; i < availableCoins.Length; i++)
+            {
+                for (var j = availableCoins[i]; j <= sum; j++)
+                {
+                    table[j] += table[j - availableCoins[i]];
+                }
+            }
+
+            return table[sum];
         }
     }
 }
