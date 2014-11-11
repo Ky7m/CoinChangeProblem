@@ -8,7 +8,7 @@ namespace CoinChangeProblem
         static void Main()
         {
             var coins = new ushort[] { 1, 2, 5, 10, 25, 50 };
-            const int target = 100000000;
+            const uint target = 1000000000;
 
             var sw = Stopwatch.StartNew();
             var result = new CoinChangeProblemSolution()

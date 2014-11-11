@@ -9,7 +9,7 @@ namespace CoinChangeProblem
 {
     public sealed class CoinChangeProblemSolution
     {
-        private static ushort[] availableCoins;
+        private static ushort[] _availableCoins;
         private uint _targetSum;
         private SolutionMethods _targetSolutionMethods;
         private static readonly Dictionary<ulong, uint> Cache = new Dictionary<ulong, uint>();
@@ -25,7 +25,7 @@ namespace CoinChangeProblem
         public CoinChangeProblemSolution SetAvailableCoins(ushort[] coins)
         {
             Array.Sort(coins);
-            availableCoins = coins.Reverse().ToArray();
+            _availableCoins = coins.Reverse().ToArray();
             return this;
         }
 
@@ -89,11 +89,11 @@ namespace CoinChangeProblem
         private static uint FindPossibleWaysRecursive(uint sum, byte coinIndex)
         {
             RuntimeHelpers.EnsureSufficientExecutionStack();
-            while (availableCoins[coinIndex] > sum)
+            while (_availableCoins[coinIndex] > sum)
             {
                 coinIndex++;
             }
-            var c = (uint)availableCoins[coinIndex];
+            var c = (uint)_availableCoins[coinIndex];
 
             uint count;
             if (sum == c)
@@ -111,7 +111,7 @@ namespace CoinChangeProblem
                 }
             }
 
-            if (coinIndex >= (availableCoins.Length - 1))
+            if (coinIndex >= (_availableCoins.Length - 1))
             {
                 return count;
             }
@@ -135,11 +135,12 @@ namespace CoinChangeProblem
             // Pick all coins one by one and update the table[] values
             // after the index greater than or equal to the value of the
             // picked coin
-            for (var i = 0; i < availableCoins.Length; i++)
+            var length = Convert.ToUInt32(_availableCoins.Length);
+            for (ulong i = 0; i < length; i++)
             {
-                for (var j = availableCoins[i]; j <= sum; j++)
+                for (long j = _availableCoins[i]; j <= sum; j++)
                 {
-                    table[j] += table[j - availableCoins[i]];
+                    table[j] += table[j - _availableCoins[i]];
                 }
             }
 
