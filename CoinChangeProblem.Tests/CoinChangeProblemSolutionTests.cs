@@ -1,61 +1,30 @@
 ﻿using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
+using Xunit.Extensions;
 
 namespace CoinChangeProblem.Tests
 {
-    [TestClass]
     public class CoinChangeProblemSolutionTests
     {
-        [TestMethod]
-        [Description("Check count of possible ways. Target sum: 1. Available coins: 1, 2, 5, 10, 25, 50")]
-        public void CheckCountFor1Using_1_2_5_10_25_50()
+        [Theory(DisplayName = "CheckCountOfPossibleWaysForCoinsSet", Timeout = 5000),
+         InlineData(new ushort[] {1, 2, 5, 10, 25, 50}, 1u, 1u),
+         InlineData(new ushort[] {50, 1, 5, 25, 10, 2}, 100u, 3953u),
+         InlineData(new ushort[] {1, 2, 5, 10, 25, 50}, 10u, 11u),
+         InlineData(new ushort[] {1, 2, 5, 10, 25, 50}, 100u, 3953u),
+         InlineData(new ushort[] {1, 2, 5, 10, 25, 50}, 1000u, 83472746u),
+         InlineData(new ushort[] {1, 2, 5, 10, 25, 50}, 10000u, 2526163903u),
+         InlineData(new ushort[] {1, 2}, 10u, 6u)
+        ]
+        public void CheckCountOfPossibleWaysForCoinsSet(ushort[] coinsSet, uint targetSum, uint expected)
         {
-            RunTest(new ushort[]{ 1, 2, 5, 10, 25, 50 }, 1, 1u);
+            var results = GetResultsFromSolutionsMethods(coinsSet, targetSum);
+            foreach (var result in results)
+            {
+                Assert.Equal(result, expected);
+            }
         }
 
-        [TestMethod]
-        [Description("Check coins set sort functionality. Target sum: 100. Available coins: 1, 2, 5, 10, 25, 50")]
-        public void CheckCoinsSetSortFunctionality()
-        {
-            RunTest(new ushort[] { 50, 1, 5, 25, 10, 2 }, 100, 3953u);
-        }
-
-        [TestMethod]
-        [Description("Check count of possible ways. Target sum: 10. Available coins: 1, 2, 5, 10, 25, 50")]
-        public void CheckCountFor10Using_1_2_5_10_25_50()
-        {
-            RunTest(new ushort[] { 1, 2, 5, 10, 25, 50 }, 10, 11u);
-        }
-
-        [TestMethod]
-        [Description("Check count of possible ways. Target sum: 100. Available coins: 1, 2, 5, 10, 25, 50")]
-        public void CheckCountFor100Using_1_2_5_10_25_50()
-        {
-            RunTest(new ushort[] { 1, 2, 5, 10, 25, 50 }, 100, 3953u);
-        }
-
-        [TestMethod]
-        [Description("Check count of possible ways. Target sum: 1000. Available coins: 1, 2, 5, 10, 25, 50")]
-        public void CheckCountFor1000Using_1_2_5_10_25_50()
-        {
-            RunTest(new ushort[] { 1, 2, 5, 10, 25, 50 }, 1000,83472746u);
-        }
-
-        [TestMethod]
-        [Description("Check count of possible ways. Target sum: 10000. Available coins: 1, 2, 5, 10, 25, 50")]
-        public void CheckCountFor10000Using_1_2_5_10_25_50()
-        {
-            RunTest(new ushort[] { 1, 2, 5, 10, 25, 50 }, 10000, 2526163903u);
-        }
-
-        [TestMethod]
-        [Description("Check count of possible ways. Target sum: 10. Available coins: 1, 2")]
-        public void CheckCountFor10Using_1_2()
-        {
-            RunTest(new ushort[] { 1, 2 }, 10, 6u);
-        }
-
-        private static void RunTest(ushort[] coins, uint targetSum, uint expected)
+        private static uint[] GetResultsFromSolutionsMethods(ushort[] coins, uint targetSum)
         {
             var solutionMethods = (SolutionMethods[])Enum.GetValues(typeof(SolutionMethods));
             var results = new uint[solutionMethods.Length];
@@ -69,12 +38,8 @@ namespace CoinChangeProblem.Tests
                             .Using(solutionMethod)
                             .GetCountOfPossibleWays();
             }
-
-            Assert.AreEqual(solutionMethods.Length, results.Length);
-            foreach (var result in results)
-            {
-                Assert.AreEqual(result, expected);
-            }
+            Assert.Equal(solutionMethods.Length, results.Length);
+            return results;
         }
     }
 }
