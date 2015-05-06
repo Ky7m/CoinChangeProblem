@@ -1,12 +1,11 @@
 ﻿using System;
 using Xunit;
-using Xunit.Extensions;
 
 namespace CoinChangeProblem.Tests
 {
     public class CoinChangeProblemSolutionTests
     {
-        [Theory(DisplayName = "CheckCountOfPossibleWaysForCoinsSet", Timeout = 5000),
+        [Theory(DisplayName = "CheckCountOfPossibleWaysForCoinsSet"),
          InlineData(new ushort[] {1, 2, 5, 10, 25, 50}, 1u, 1u),
          InlineData(new ushort[] {50, 1, 5, 25, 10, 2}, 100u, 3953u),
          InlineData(new ushort[] {1, 2, 5, 10, 25, 50}, 10u, 11u),
