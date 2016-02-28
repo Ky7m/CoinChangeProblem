@@ -3,6 +3,7 @@
     public enum SolutionMethods
     {
         Recursive,
-        DynamicProgramming
+        DynamicProgramming,
+        TailRecursive
     }
 }

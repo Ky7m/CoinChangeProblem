@@ -30,7 +30,7 @@ namespace CoinChangeProblem.Tests
 
             for (var index = 0; index < solutionMethods.Length; index++)
             {
-                SolutionMethods solutionMethod = solutionMethods[index];
+                var solutionMethod = solutionMethods[index];
                 results[index] = new CoinChangeProblemSolution()
                             .SetAvailableCoins(coins)
                             .SetTargetSum(targetSum)

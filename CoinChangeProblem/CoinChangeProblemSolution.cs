@@ -18,7 +18,8 @@ namespace CoinChangeProblem
             <SolutionMethods, Func<uint, uint>>
                                         {
                                             { SolutionMethods.Recursive, FindPossibleWaysUsingRecursion },
-                                            { SolutionMethods.DynamicProgramming, FindPossibleWaysUsingDynamicProgramming }
+                                            { SolutionMethods.DynamicProgramming, FindPossibleWaysUsingDynamicProgramming },
+                                            { SolutionMethods.TailRecursive, FindPossibleWaysUsingTailRecursive }
                                         };
 
 
@@ -58,6 +59,7 @@ namespace CoinChangeProblem
                     {
                         try
                         {
+                            RuntimeHelpers.EnsureSufficientExecutionStack();
                             result = FindPossibleWaysRecursive(sum, 0);
                         }
                         catch (InsufficientExecutionStackException)
@@ -88,7 +90,6 @@ namespace CoinChangeProblem
 
         private static uint FindPossibleWaysRecursive(uint sum, byte coinIndex)
         {
-            RuntimeHelpers.EnsureSufficientExecutionStack();
             while (_availableCoins[coinIndex] > sum)
             {
                 coinIndex++;
@@ -145,6 +146,11 @@ namespace CoinChangeProblem
             }
 
             return table[sum];
+        }
+
+        private static uint FindPossibleWaysUsingTailRecursive(uint sum)
+        {
+            return FindPossibleWaysRecursive(sum, 0);
         }
     }
 }
